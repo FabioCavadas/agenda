@@ -13,5 +13,8 @@ class Evento(models.Model):
     class Meta: # Padrão utilizado para forçar a criação da tabela com o nome que vc deseja, evita criar "core_evento"
         db_table = 'evento'
 
-    # def __str__(self):
-    #     return self.titulo
+    def __str__(self):
+        return self.titulo
+
+    def get_data_evento(self):
+        return self.data_evento.strftime('%d/%m/%Y %H:%M Hrs')
