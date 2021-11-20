@@ -9,6 +9,7 @@ class Evento(models.Model):
     data_evento = models.DateTimeField(verbose_name='Data do Evento')
     data_criacao = models.DateTimeField(auto_now=True)
     usuario = models.ForeignKey(User, on_delete=models.CASCADE) # utilizando a propria tabela de usuários do django
+    local = models.CharField(blank=True, null=True, max_length=60)
 
     class Meta: # Padrão utilizado para forçar a criação da tabela com o nome que vc deseja, evita criar "core_evento"
         db_table = 'evento'
