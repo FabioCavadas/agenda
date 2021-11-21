@@ -3,6 +3,8 @@ from core.models import Evento
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+from datetime import  datetime, timedelta
+from django.http.response import Http404, JsonResponse
 
 # Create your views here.
 
@@ -31,7 +33,10 @@ def submit_login(request):
 @login_required(login_url='/login/')
 def lista_eventos(request):
         usuario = request.user
-        evento = Evento.objects.filter(usuario=usuario) # retornará as agendas do usuário logado!!
+        data_atual = datetime.now() - timedelta(hours=1) # Retorna eventos da data atual ate 1 hora antes da data atuaç
+        # evento = Evento.objects.filter(usuario=usuario) - retornará as agendas do usuário logado!!
+        evento = Evento.objects.filter(usuario=usuario,
+                                       data_evento__gt=data_atual)
         #evento = Evento.objects.get(id=1) - Retorna evento de um usuário específico
         #evento = Evento.objects.all() # Retorna eventos de todos os usuários
         #usuario = request.user # Retorna eventos do usuário logado na sessão
@@ -78,9 +83,19 @@ def submit_evento(request):
 def delete_evento(request, id_evento):
         #Evento.objects.filter(id=id_evento).delete() - Desta forma temos uma falaha de segurançao onde podemos excluir um registro, informando o id pela url, ou seja, qualquer usuário excluiu qualquer registro
         usuario = request.user
-        evento = Evento.objects.get(id=id_evento)
+        try:
+                evento = Evento.objects.get(id=id_evento)
+        except Exception:
+                raise Http404()
         if usuario == evento.usuario:
                 evento.delete()
+        else:
+                raise Http404()
         return redirect('/')
+
+def json_lista_evento(request): # função criada para disponibilização de dados sem a necessidade de requerer q o usuário esteja logado, Transferencia de dados via json / API
+        usuario = request.user
+        evento = Evento.objects.filter(usuario=usuario).values('id','titulo')
+        return JsonResponse(list(evento), safe=False)
 
 
